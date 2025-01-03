@@ -55,7 +55,8 @@ defmodule AkkaChess.MixProject do
       {:bandit, "~> 1.5"},
       {:broadway_cloud_pub_sub, "~> 0.9.1"},
       {:goth, "~> 1.4"},
-      {:req, "~> 0.5.8"}
+      {:req, "~> 0.5.8"},
+      {:joken, "~> 2.6"}
     ]
   end
 
