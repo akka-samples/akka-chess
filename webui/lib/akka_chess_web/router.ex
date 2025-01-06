@@ -2,6 +2,8 @@ defmodule AkkaChessWeb.Router do
   use AkkaChessWeb, :router
 
   pipeline :browser do
+    plug Ueberauth
+
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
@@ -20,6 +22,13 @@ defmodule AkkaChessWeb.Router do
     get "/", PageController, :home
 
     live "/play/:matchId", PlayLive
+  end
+
+  scope "/auth", AkkaChessWeb do
+    pipe_through :browser
+
+    get "/:provider", AuthController, :request
+    get "/:provider/callback", AuthController, :callback
   end
 
   # Other scopes may use custom stacks.

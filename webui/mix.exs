@@ -56,7 +56,8 @@ defmodule AkkaChess.MixProject do
       {:broadway_cloud_pub_sub, "~> 0.9.1"},
       {:goth, "~> 1.4"},
       {:req, "~> 0.5.8"},
-      {:joken, "~> 2.6"}
+      {:joken, "~> 2.6"},
+      {:ueberauth_github, "~> 0.8.3"}
     ]
   end
 
