@@ -1,23 +1,30 @@
 defmodule AkkaChessWeb.PlayLive do
   use AkkaChessWeb, :live_view
 
+  import SaladUI.Separator
+  import SaladUI.ScrollArea
+  import SaladUI.Table
+  import SaladUI.Card
+  import SaladUI.Button
+
   require Logger
 
   @impl true
   def mount(params, session, socket) do
     matchId = Map.get(params, "matchId")
 
-    pieces =
+    {pieces, moves} =
       case AkkaChess.ChessClient.get_match(matchId) do
         {:ok, match} ->
-          match["pieces"]
+          {match["pieces"], match["moves"]}
 
         _ ->
-          []
+          {[], []}
       end
 
     board = %{
-      pieces: pieces
+      pieces: pieces,
+      moves: moves
     }
 
     Phoenix.PubSub.subscribe(AkkaChess.PubSub, "match:#{matchId}")

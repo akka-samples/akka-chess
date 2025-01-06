@@ -22,7 +22,7 @@ defmodule AkkaChessWeb.ChessComponents do
         <div
           :for={{piece, idx} <- Enum.with_index(row)}
           style={get_bg(ridx, idx)}
-          class={get_border(ridx, idx) <> " text-5xl text-center align-middle p-1 items-center align-center place-content-center"}
+          class={get_border(ridx, idx) <> " h-16 text-5xl text-center align-middle p-1 items-center align-center place-content-center"}
         >
           <.chesspiece piece={piece} idx={idx} />
         </div>
