@@ -24,4 +24,11 @@ defmodule AkkaChessWeb.AuthController do
     |> put_flash(:error, "Failed to authenticate")
     |> redirect(to: ~p"/")
   end
+
+  def delete(conn, _params) do
+    conn
+    |> put_flash(:info, "You have been logged out!")
+    |> clear_session()
+    |> redirect(to: "/")
+  end
 end

@@ -13,6 +13,7 @@ defmodule AkkaChess.Application do
       {Phoenix.PubSub, name: AkkaChess.PubSub},
       {Goth, name: AkkaChess.Goth},
       {AkkaChess.GcpBroadway, []},
+      TwMerge.Cache,
       # Start a worker by calling: AkkaChess.Worker.start_link(arg)
       # {AkkaChess.Worker, arg},
       # Start to serve requests, typically the last entry

@@ -1,32 +1,79 @@
-<header class="px-4 sm:px-6 lg:px-8">
-  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-    <div class="flex items-center gap-4">
-      <a href="/">
-        <img src={~p"/images/logo.svg"} width="36" />
-      </a>
-      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
-        v<%= Application.spec(:phoenix, :vsn) %>
-      </p>
-    </div>
-    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-      <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
-        @elixirphoenix
-      </a>
-      <a href="https://github.com/phoenixframework/phoenix" class="hover:text-zinc-700">
-        GitHub
-      </a>
-      <a
-        href="https://hexdocs.pm/phoenix/overview.html"
-        class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
-      >
-        Get Started <span aria-hidden="true">&rarr;</span>
-      </a>
-    </div>
+<div class="flex min-h-screen w-full flex-col bg-muted/40">
+  <aside class="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+    <nav class="flex flex-col items-center gap-4 px-2 sm:py-5">
+      <.tooltip>
+        <.link
+          href="#"
+          class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+        >
+          <.icon name="hero-home" class="h-5 w-5" />
+          <span class="sr-only">Home</span>
+        </.link>
+        <.tooltip_content side="right">Home</.tooltip_content>
+      </.tooltip>
+    </nav>
+    <nav class="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
+      <.tooltip>
+        <.link
+          href="#"
+          class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+        >
+          <.icon name="hero-cog-6-tooth" class="h-5 w-5" />
+          <span class="sr-only">Settings</span>
+        </.link>
+        <.tooltip_content side="right">Settings</.tooltip_content>
+      </.tooltip>
+    </nav>
+  </aside>
+  <div class="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+    <header class="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+      <div class="relative ml-auto flex-1 md:grow-0">
+        <br />
+      </div>
+      <%= if assigns[:current_user] do %>
+        <.dropdown_menu>
+          <.dropdown_menu_trigger>
+            <.button variant="outline" size="icon" class="overflow-hidden rounded-full">
+              <img
+                src={@current_user.avatar}
+                width="{36}"
+                height="{36}"
+                alt="Avatar"
+                class="overflow-hidden rounded-full"
+              />
+            </.button>
+          </.dropdown_menu_trigger>
+          <.dropdown_menu_content align="end">
+            <.menu>
+              <.menu_label>My Account</.menu_label>
+              <.menu_separator />
+              <.menu_item>Settings</.menu_item>
+              <.menu_item>Support</.menu_item>
+              <.menu_separator />
+              <.menu_item>
+                <.link href="/auth/logout" method="delete">Log out</.link>
+              </.menu_item>
+            </.menu>
+          </.dropdown_menu_content>
+        </.dropdown_menu>
+      <% else %>
+        <.tooltip>
+          <.link
+            href="/auth/github"
+            class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+          >
+            <.icon name="hero-user-circle" class="h-5 w-5" />
+          </.link>
+          <.tooltip_content side="left">Log in with Github</.tooltip_content>
+        </.tooltip>
+      <% end %>
+    </header>
+
+    <main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+      <div class="flex items-center">
+        <.flash_group flash={@flash} />
+        {@inner_content}
+      </div>
+    </main>
   </div>
-</header>
-<main class="px-4 py-20 sm:px-6 lg:px-8">
-  <div class="mx-auto max-w-2xl">
-    <.flash_group flash={@flash} />
-    <%= @inner_content %>
-  </div>
-</main>
+</div>

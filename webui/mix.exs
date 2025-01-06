@@ -57,7 +57,8 @@ defmodule AkkaChess.MixProject do
       {:goth, "~> 1.4"},
       {:req, "~> 0.5.8"},
       {:joken, "~> 2.6"},
-      {:ueberauth_github, "~> 0.8.3"}
+      {:ueberauth_github, "~> 0.8.3"},
+      {:salad_ui, "~> 0.14.4"}
     ]
   end
 

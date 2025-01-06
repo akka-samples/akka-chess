@@ -10,5 +10,10 @@ defmodule AkkaChessWeb.Layouts do
   """
   use AkkaChessWeb, :html
 
+  import SaladUI.Tooltip
+  import SaladUI.DropdownMenu
+  import SaladUI.Menu
+  import SaladUI.Button
+
   embed_templates "layouts/*"
 end

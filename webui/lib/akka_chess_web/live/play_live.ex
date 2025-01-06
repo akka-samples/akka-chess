@@ -4,7 +4,7 @@ defmodule AkkaChessWeb.PlayLive do
   require Logger
 
   @impl true
-  def mount(params, _session, socket) do
+  def mount(params, session, socket) do
     matchId = Map.get(params, "matchId")
 
     pieces =
@@ -22,7 +22,7 @@ defmodule AkkaChessWeb.PlayLive do
 
     Phoenix.PubSub.subscribe(AkkaChess.PubSub, "match:#{matchId}")
 
-    {:ok, assign(socket, board: board)}
+    {:ok, assign(socket, board: board, current_user: session["current_user"])}
   end
 
   @impl true
