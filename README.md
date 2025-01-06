@@ -19,7 +19,7 @@ The following is a list of planned features/components and their status:
 
 - [X] Render chessboard
 - [X] React to move updates from Google Pubsub
-- [ ] Add Github OAuth authentication to site
+- [X] Add Github OAuth authentication to site
 - [ ] Finish theming/layout for the site
 - [X] Mint JWT to be used as bearer token for service auth
 - [ ] Display move log when looking at active chessboard
