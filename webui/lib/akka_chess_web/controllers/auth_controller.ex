@@ -2,12 +2,15 @@ defmodule AkkaChessWeb.AuthController do
   use AkkaChessWeb, :controller
   plug Ueberauth
 
+  alias AkkaChess.ChessClient
   alias AkkaChess.UserFromAuth
 
   def callback(%{assigns: %{ueberauth_auth: %Ueberauth.Auth{} = auth}} = conn, _params) do
     {:ok, user} = UserFromAuth.find_or_create(auth)
 
     IO.inspect(user)
+
+    ChessClient.record_login(user.id, user.avatar, user.name)
 
     conn
     |> put_flash(:info, "Successfully authenticated.")

@@ -19,7 +19,7 @@ import ch.astorm.jchess.core.entities.Queen;
 import ch.astorm.jchess.core.entities.Rook;
 import ch.astorm.jchess.io.MoveParser.InvalidMoveException;
 import ch.astorm.jchess.util.UnicodePositionRenderer;
-import chess.api.MatchesApi.MoveRequest;
+import chess.api.ChessApi.MoveRequest;
 
 public record Chessboard(ArrayList<String> moves) {
 

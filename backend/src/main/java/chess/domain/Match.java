@@ -2,8 +2,8 @@ package chess.domain;
 
 import java.time.Instant;
 
-import chess.api.MatchesApi.MatchStateResponse;
-import chess.api.MatchesApi.MoveRequest;
+import chess.api.ChessApi.MatchStateResponse;
+import chess.api.ChessApi.MoveRequest;
 
 public record Match(String matchId, Chessboard board, String whiteId, String blackId, Instant matchStart) {
 

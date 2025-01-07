@@ -16,53 +16,67 @@ import akka.javasdk.annotations.http.Post;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.timer.TimerScheduler;
 import akka.stream.Materializer;
-import chess.api.MatchesApi.CreateMatchRequest;
-import chess.api.MatchesApi.MatchStateResponse;
-import chess.api.MatchesApi.MoveRequest;
+import chess.api.ChessApi.CreateMatchRequest;
+import chess.api.ChessApi.LoginRecord;
+import chess.api.ChessApi.MatchStateResponse;
+import chess.api.ChessApi.MoveRequest;
+import chess.api.ChessApi.PlayerResponse;
 import chess.application.MatchArchiveView;
 import chess.application.MatchSummaryView;
 
 // @Acl(allow = @Acl.Matcher(service = "*"))
 @Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
-@JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers = "chess-web")
-@HttpEndpoint("/matches")
-public class InternalEndpoint {
-	private static final Logger log = LoggerFactory.getLogger(InternalEndpoint.class);
+// @JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers =
+// "chess-web")
+@HttpEndpoint("/chess")
+public class ChessEndpoint {
+	private static final Logger log = LoggerFactory.getLogger(ChessEndpoint.class);
 
 	private final EndpointImpl core;
 
-	public InternalEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler,
+	public ChessEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler,
 			Materializer materializer) {
 		core = new EndpointImpl(config, componentClient, timerScheduler, materializer);
 	}
 
-	@Post("/")
+	@Post("/matches")
 	public CompletionStage<HttpResponse> createMatch(CreateMatchRequest request) {
 		return core.createMatch(request);
 	}
 
-	@Post("/{matchId}/moves")
+	@Post("/matches/{matchId}/moves")
 	public CompletionStage<HttpResponse> addMove(String matchId, MoveRequest request) {
 		return core.addMove(matchId, request);
 	}
 
-	@Get("/{matchId}/render")
+	@Get("/matches/{matchId}/render")
 	public CompletionStage<String> render(String matchId) {
 		return core.render(matchId);
 	}
 
-	@Get("/{matchId}")
+	@Get("/matches/{matchId}")
 	public CompletionStage<MatchStateResponse> getMatch(String matchId) {
 		return core.getMatch(matchId);
 	}
 
-	@Get("/")
+	@Get("/matches")
 	public CompletionStage<MatchSummaryView.Matches> getMatches() {
 		return core.getMatches();
 	}
 
-	@Get("/player/{playerId}")
+	@Get("/matches/player/{playerId}")
 	public CompletionStage<MatchArchiveView.MatchArchives> getMatchesByPlayer(String playerId) {
 		return core.getMatchesByPlayer(playerId);
 	}
+
+	@Post("/players/logins")
+	public CompletionStage<HttpResponse> recordLogin(LoginRecord login) {
+		return core.recordLogin(login);
+	}
+
+	@Get("/players/{playerId}")
+	public CompletionStage<PlayerResponse> getPlayer(String playerId) {
+		return core.getPlayer(playerId);
+	}
+
 }
