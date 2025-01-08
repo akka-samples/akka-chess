@@ -2,6 +2,9 @@ package chess.application;
 
 import java.time.Instant;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import akka.javasdk.annotations.ComponentId;
 import akka.javasdk.eventsourcedentity.EventSourcedEntity;
 import akka.javasdk.eventsourcedentity.EventSourcedEntityContext;
@@ -14,22 +17,26 @@ import chess.domain.PlayerEvent;
 public class PlayerEntity extends EventSourcedEntity<Player, PlayerEvent> {
 	private final String entityId;
 
+	private static final Logger logger = LoggerFactory.getLogger(PlayerEntity.class);
+
 	public PlayerEntity(EventSourcedEntityContext context) {
 		this.entityId = context.entityId();
 	}
 
 	@Override
 	public Player emptyState() {
-		return new Player(entityId, "", "", 0, 0, Instant.MIN);
+		return new Player(entityId, "", "", 0, 0, 0, Instant.MIN);
 	}
 
 	@Override
 	public Player applyEvent(PlayerEvent event) {
+
 		return switch (event) {
 			case PlayerEvent.LoggedIn loggedIn -> currentState().onLogin(loggedIn);
 			case PlayerEvent.Created created -> currentState().onCreated(created);
 			case PlayerEvent.MatchWon won -> currentState().onWon(won);
 			case PlayerEvent.MatchLost lost -> currentState().onLost(lost);
+			case PlayerEvent.MatchDraw draw -> currentState().onDraw(draw);
 		};
 	}
 
@@ -37,6 +44,24 @@ public class PlayerEntity extends EventSourcedEntity<Player, PlayerEvent> {
 	public Effect<CommandResponse> recordLogin(LoginRecord login) {
 		return effects().persist(new PlayerEvent.LoggedIn(login.playerId(), Instant.now(), login.name(),
 				login.avatarUrl()))
+				.thenReply(__ -> CommandResponse.accepted());
+	}
+
+	public Effect<CommandResponse> addWin(String matchId) {
+		return effects().persist(
+				new PlayerEvent.MatchWon(entityId, matchId))
+				.thenReply(__ -> CommandResponse.accepted());
+	}
+
+	public Effect<CommandResponse> addLoss(String matchId) {
+		return effects().persist(
+				new PlayerEvent.MatchLost(entityId, matchId))
+				.thenReply(__ -> CommandResponse.accepted());
+	}
+
+	public Effect<CommandResponse> addDraw(String matchId) {
+		return effects().persist(
+				new PlayerEvent.MatchDraw(entityId, matchId))
 				.thenReply(__ -> CommandResponse.accepted());
 	}
 
@@ -48,7 +73,8 @@ public class PlayerEntity extends EventSourcedEntity<Player, PlayerEvent> {
 		return effects().reply(
 				new PlayerResponse(currentState().name(),
 						currentState().avatarUrl(), currentState().wins(),
-						currentState().losses(), currentState().lastLogin()));
+						currentState().losses(), currentState().draws(),
+						currentState().lastLogin()));
 
 	}
 }

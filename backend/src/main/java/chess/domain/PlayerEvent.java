@@ -23,4 +23,8 @@ public sealed interface PlayerEvent {
 	record MatchLost(String playerId, String matchId) implements PlayerEvent {
 	}
 
+	@TypeName("match-draw")
+	record MatchDraw(String playerId, String matchId) implements PlayerEvent {
+	}
+
 }

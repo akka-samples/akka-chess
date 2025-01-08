@@ -11,14 +11,16 @@ public sealed interface ChessApi {
 	}
 
 	public record MatchStateResponse(String matchId,
-			List<String> pieces, List<String> moves, String whiteId, String blackId) implements ChessApi {
+			List<String> pieces, List<String> moves, String whiteId, String blackId, String status)
+			implements ChessApi {
 	}
 
 	public record LoginRecord(String playerId, String name, String avatarUrl, Instant loginTime)
 			implements ChessApi {
 	}
 
-	public record PlayerResponse(String name, String avatarUrl, int wins, int losses, Instant lastLogin) {
+	public record PlayerResponse(String name, String avatarUrl, int wins, int losses, int draws,
+			Instant lastLogin) {
 	}
 
 }

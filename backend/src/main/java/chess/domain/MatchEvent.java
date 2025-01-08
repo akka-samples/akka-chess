@@ -16,7 +16,8 @@ public sealed interface MatchEvent {
 	}
 
 	@TypeName("game-finished")
-	record GameFinished(String matchId, String finalStatus, Instant finishTime) implements MatchEvent {
+	record GameFinished(String matchId, String whiteId, String blackId, String finalStatus, Instant finishTime)
+			implements MatchEvent {
 	}
 
 }

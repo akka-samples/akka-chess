@@ -45,6 +45,20 @@ public class MatchEntity extends EventSourcedEntity<Match, MatchEvent> {
 		}
 	}
 
+	// NOTE: a manual command to finish a match. Not to be used via external APIs
+	public Effect<CommandResponse> finish(String finalStatus) {
+		if (!currentState().hasStarted()) {
+			return effects().reply(CommandResponse.rejected("can't finish an unstarted match"));
+		} else {
+			return effects().persist(
+					new MatchEvent.GameFinished(currentState().matchId(),
+							currentState().whiteId(),
+							currentState().blackId(),
+							finalStatus, Instant.now()))
+					.thenReply(__ -> CommandResponse.accepted());
+		}
+	}
+
 	public Effect<CommandResponse> move(MoveRequest request) {
 		if (!currentState().hasStarted()) {
 			return effects().reply(CommandResponse.no_entity());
@@ -61,6 +75,8 @@ public class MatchEntity extends EventSourcedEntity<Match, MatchEvent> {
 				if (newMatch.isFinished()) {
 					MatchEvent finished = new MatchEvent.GameFinished(entityId,
 							newMatch.getStatus(),
+							newMatch.whiteId(),
+							newMatch.blackId(),
 							Instant.now());
 					ArrayList<MatchEvent> evts = new ArrayList<MatchEvent>();
 					evts.add(moved);
@@ -95,6 +111,7 @@ public class MatchEntity extends EventSourcedEntity<Match, MatchEvent> {
 		return switch (event) {
 			case MatchEvent.MatchStarted started -> currentState().onMatchStarted(started);
 			case MatchEvent.PieceMoved moved -> currentState().onPieceMoved(moved);
+			// TODO: should we remove the entity on GameFinished?
 			default -> currentState();
 		};
 	}

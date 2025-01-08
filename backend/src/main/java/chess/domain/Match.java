@@ -24,7 +24,8 @@ public record Match(String matchId, Chessboard board, String whiteId, String bla
 	}
 
 	public MatchStateResponse getMatch() {
-		return new MatchStateResponse(matchId, board._getUnicodePieces(), board.moves(), whiteId, blackId);
+		return new MatchStateResponse(matchId, board._getUnicodePieces(), board.moves(), whiteId, blackId,
+				board._getStatus());
 	}
 
 	public boolean hasStarted() {
