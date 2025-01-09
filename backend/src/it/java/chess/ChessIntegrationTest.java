@@ -1,16 +1,18 @@
 package chess;
 
-import org.junit.jupiter.api.Test;
-
 import java.time.Instant;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import akka.javasdk.testkit.EventingTestKit;
 import akka.javasdk.testkit.TestKit;
-import akka.javasdk.testkit.TestKitSupport;
 import akka.javasdk.testkit.TestKit.Settings.EventingSupport;
+import akka.javasdk.testkit.TestKitSupport;
 import chess.api.ChessApi.CreateMatchRequest;
 import chess.api.ChessApi.LoginRecord;
 import chess.api.ChessApi.MatchStateResponse;
@@ -21,10 +23,9 @@ import chess.application.PlayerEntity;
 import chess.domain.MatchEvent;
 import chess.domain.PlayerEvent;
 
+@Execution(ExecutionMode.SAME_THREAD)
 public class ChessIntegrationTest extends TestKitSupport {
 
-	private final CreateMatchRequest createRequest = new CreateMatchRequest("testmatch99", "playerwhite",
-			"playerblack");
 	private final LoginRecord whiteLogin = new LoginRecord("playerwhite", "White Test", "", Instant.now());
 	private final LoginRecord blackLogin = new LoginRecord("playerblack", "Black Test", "", Instant.now());
 
@@ -35,7 +36,6 @@ public class ChessIntegrationTest extends TestKitSupport {
 		return TestKit.Settings.DEFAULT
 				.withTopicOutgoingMessages("chess-events")
 				.withEventingSupport(EventingSupport.TEST_BROKER);
-		// .withEventingSupport(EventingSupport.GOOGLE_PUBSUB);
 	}
 
 	@Override
@@ -46,19 +46,21 @@ public class ChessIntegrationTest extends TestKitSupport {
 	}
 
 	@BeforeEach
-	public void clearTopics() {
+	public void beforeEach() {
 		eventsTopic.clear();
+		loginPlayers();
 	}
 
 	@Test
 	public void drawModifiesTwoPlayers() {
 
-		loginPlayers();
+		final String matchId = "testmatch99";
+		final CreateMatchRequest createRequest = new CreateMatchRequest(matchId, "playerwhite", "playerblack");
 
 		// Create the match
 		CommandResponse response1 = await(
 				componentClient
-						.forEventSourcedEntity("testmatch99")
+						.forEventSourcedEntity(matchId)
 						.method(MatchEntity::create)
 						.invokeAsync(createRequest));
 
@@ -67,7 +69,7 @@ public class ChessIntegrationTest extends TestKitSupport {
 		// Finish the match with a draw
 		CommandResponse response2 = await(
 				componentClient
-						.forEventSourcedEntity("testmatch99")
+						.forEventSourcedEntity(matchId)
 						.method(MatchEntity::finish)
 						.invokeAsync("DRAW"));
 
@@ -84,7 +86,7 @@ public class ChessIntegrationTest extends TestKitSupport {
 
 		MatchStateResponse m = await(
 				componentClient
-						.forEventSourcedEntity("testmatch99")
+						.forEventSourcedEntity(matchId)
 						.method(MatchEntity::getMatch)
 						.invokeAsync());
 		System.out.println(m);
@@ -108,11 +110,52 @@ public class ChessIntegrationTest extends TestKitSupport {
 
 	}
 
-	/*
-	 * @Test
-	 * public void winModifiesTwoPlayers() {
-	 * }
-	 */
+	@Test
+	public void winModifiesTwoPlayers() {
+		final String matchId = "testmatch100";
+		final CreateMatchRequest createRequest = new CreateMatchRequest(matchId, "playerwhite", "playerblack");
+
+		// Create the match
+		CommandResponse response1 = await(
+				componentClient
+						.forEventSourcedEntity(matchId)
+						.method(MatchEntity::create)
+						.invokeAsync(createRequest));
+
+		Assertions.assertEquals(response1.code(), 200);
+
+		// Finish the match with a win
+		CommandResponse response2 = await(
+				componentClient
+						.forEventSourcedEntity(matchId)
+						.method(MatchEntity::finish)
+						.invokeAsync("WIN_BLACK"));
+
+		Assertions.assertEquals(response2.code(), 200);
+
+		// Assert the list of events we expect
+		eventsTopic.expectOneTyped(PlayerEvent.LoggedIn.class);
+		eventsTopic.expectOneTyped(PlayerEvent.LoggedIn.class);
+		eventsTopic.expectOneTyped(MatchEvent.MatchStarted.class);
+		eventsTopic.expectOneTyped(MatchEvent.GameFinished.class);
+		// we should get 2 draw events
+		eventsTopic.expectOneTyped(PlayerEvent.MatchWon.class);
+		eventsTopic.expectOneTyped(PlayerEvent.MatchLost.class);
+
+		PlayerResponse player1 = await(
+				componentClient.forEventSourcedEntity("playerwhite")
+						.method(PlayerEntity::getPlayer)
+						.invokeAsync());
+
+		PlayerResponse player2 = await(
+				componentClient.forEventSourcedEntity("playerblack")
+						.method(PlayerEntity::getPlayer)
+						.invokeAsync());
+
+		Assertions.assertEquals(1, player1.losses());
+		Assertions.assertEquals(1, player2.wins());
+	}
+
 	private void loginPlayers() {
 		await(
 				componentClient.forEventSourcedEntity("playerwhite")
