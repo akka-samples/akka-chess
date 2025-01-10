@@ -18,7 +18,8 @@ defmodule AkkaChess.UserFromAuth do
   end
 
   defp basic_info(auth) do
-    %{id: auth.uid, name: name_from_auth(auth), avatar: avatar_from_auth(auth)}
+    # Githubs numbers make Elixir think they're integers
+    %{id: Integer.to_string(auth.uid), name: name_from_auth(auth), avatar: avatar_from_auth(auth)}
   end
 
   defp name_from_auth(auth) do

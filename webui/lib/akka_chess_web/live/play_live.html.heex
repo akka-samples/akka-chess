@@ -1,6 +1,6 @@
 <div class="grid grid-cols-2 gap-4">
   <div>
-    <.chessboard board={@board} />
+    <.chessboard board={@board} player={@current_user.id} />
   </div>
   <div class="w-80 grid-cols-1 grid gap-4">
     <div class="border rounded-md">
@@ -16,8 +16,13 @@
         </.table_header>
         <.table_body>
           <.table_row>
-            <.table_cell>
-              <.button variant="outline" size="icon" class="overflow-hidden rounded-full">
+            <.table_cell class="items-center align-middle">
+              <.button
+                variant="outline"
+                size="icon"
+                style="--tw-ring-color: rgb(134 239 172);"
+                class={get_ring(@board, :white) <> " overflow-hidden rounded-full"}
+              >
                 <img
                   src={@current_user.avatar}
                   width="{36}"
@@ -31,9 +36,14 @@
             <.table_cell>Kevin</.table_cell>
             <.table_cell class="text-right">30</.table_cell>
           </.table_row>
-          <.table_row class="bg-green-100">
+          <.table_row>
             <.table_cell>
-              <.button variant="outline" size="icon" class="overflow-hidden rounded-full">
+              <.button
+                variant="outline"
+                size="icon"
+                style="--tw-ring-color: rgb(134 239 172);"
+                class={get_ring(@board, :black) <> " overflow-hidden rounded-full"}
+              >
                 <img
                   src={@current_user.avatar}
                   width="{36}"
@@ -59,7 +69,7 @@
         <div class="p-4">
           <h4 class="mb-4 text-sm font-medium leading-none">Moves</h4>
 
-          <div :for={move <- @board.moves} class="text-sm">
+          <div :for={move <- @board["moves"]} class="text-sm">
             {move}
             <.separator class="my-2" />
           </div>

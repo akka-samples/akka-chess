@@ -3,7 +3,11 @@ defmodule AkkaChessWeb.ChessComponents do
 
   require Integer
 
+  @rows ["8", "7", "6", "5", "4", "3", "2", "1"]
+  @cols ["a", "b", "c", "d", "e", "f", "g", "h"]
+
   attr :board, :list, required: true
+  attr :player, :string, required: true
 
   def chessboard(assigns) do
     ~H"""
@@ -15,13 +19,21 @@ defmodule AkkaChessWeb.ChessComponents do
       >
         {letter}
       </div>
-      <%= for {row, ridx} <- Enum.chunk_every(@board.pieces, 8) |> Enum.with_index() do %>
+      <%= for {row, ridx} <- Enum.chunk_every(@board["pieces"], 8) |> Enum.with_index() do %>
         <div class="text-center align-middle p-1 items-center align-center text-slate-400">
           {8 - ridx}
         </div>
         <div
           :for={{piece, idx} <- Enum.with_index(row)}
+          phx-value-location={get_agn(ridx, idx)}
           style={get_bg(ridx, idx)}
+          phx-click={
+            if can_move?(@board, @player) do
+              "move"
+            else
+              ""
+            end
+          }
           class={get_border(ridx, idx) <> " h-16 text-5xl text-center align-middle p-1 items-center align-center place-content-center"}
         >
           <.chesspiece piece={piece} idx={idx} />
@@ -48,6 +60,10 @@ defmodule AkkaChessWeb.ChessComponents do
     """
   end
 
+  defp can_move?(board, playerId) do
+    board["currentPlayerId"] == playerId
+  end
+
   defp get_border(row, col) do
     {row, col}
     |> put_top_border()
@@ -55,6 +71,10 @@ defmodule AkkaChessWeb.ChessComponents do
     |> put_right_border()
     |> put_bottom_border()
     |> put_border_color()
+  end
+
+  defp get_agn(row, col) when is_number(row) and is_number(col) do
+    Enum.at(@cols, col) <> Enum.at(@rows, row)
   end
 
   defp put_top_border({row, col}) when row == 0 do

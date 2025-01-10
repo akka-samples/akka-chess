@@ -24,8 +24,15 @@ public record Match(String matchId, Chessboard board, String whiteId, String bla
 	}
 
 	public MatchStateResponse getMatch() {
+		String currentId;
+		if (board.getColorOnMove() == "WHITE") {
+			currentId = whiteId;
+		} else {
+			currentId = blackId;
+		}
 		return new MatchStateResponse(matchId, board._getUnicodePieces(), board.moves(), whiteId, blackId,
-				board._getStatus());
+				board._getStatus(),
+				currentId);
 	}
 
 	public boolean hasStarted() {

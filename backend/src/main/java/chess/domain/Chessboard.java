@@ -35,11 +35,7 @@ public record Chessboard(ArrayList<String> moves) {
 	}
 
 	public boolean canMove(String agn) {
-		JChessGame game = JChessGame.newGame();
-
-		for (String move : moves) {
-			game.play(move);
-		}
+		JChessGame game = playMoves();
 
 		List<Move> availableMoves = game.getAvailableMoves();
 		try {
@@ -48,6 +44,12 @@ public record Chessboard(ArrayList<String> moves) {
 		} catch (InvalidMoveException e) {
 			return false;
 		}
+	}
+
+	public String getColorOnMove() {
+		JChessGame game = playMoves();
+
+		return game.getColorOnMove().toString();
 	}
 
 	public String render() {

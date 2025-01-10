@@ -11,7 +11,8 @@ public sealed interface ChessApi {
 	}
 
 	public record MatchStateResponse(String matchId,
-			List<String> pieces, List<String> moves, String whiteId, String blackId, String status)
+			List<String> pieces, List<String> moves, String whiteId, String blackId, String status,
+			String currentPlayerId)
 			implements ChessApi {
 	}
 
