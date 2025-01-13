@@ -26,6 +26,9 @@ public class MatchEntity extends EventSourcedEntity<Match, MatchEvent> {
 		this.entityId = context.entityId();
 	}
 
+	public record MoveCommand(String playerId, MoveRequest request) {
+	}
+
 	// NOTE: all match entities will always have a state: currentState() is never
 	// null, so we need the default state to indicate an "unstarted" match
 	@Override
@@ -59,11 +62,14 @@ public class MatchEntity extends EventSourcedEntity<Match, MatchEvent> {
 		}
 	}
 
-	public Effect<CommandResponse> move(MoveRequest request) {
+	public Effect<CommandResponse> move(MoveCommand moveCommand) {
+		String playerId = moveCommand.playerId();
+		MoveRequest request = moveCommand.request();
+
 		if (!currentState().hasStarted()) {
 			return effects().reply(CommandResponse.no_entity());
 		} else {
-			if (!currentState().canMove(request)) {
+			if (!currentState().canMove(playerId, request)) {
 				return effects().reply(CommandResponse.rejected("illegal move"));
 			} else {
 				MatchEvent.PieceMoved moved = new MatchEvent.PieceMoved(entityId, request.agn(),

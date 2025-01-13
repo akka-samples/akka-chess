@@ -15,21 +15,20 @@ public record Match(String matchId, Chessboard board, String whiteId, String bla
 		return new Match(matchId, board.onPieceMoved(event), whiteId, blackId, matchStart);
 	}
 
-	public boolean canMove(MoveRequest request) {
-		return board.canMove(request);
+	public boolean canMove(String playerId, MoveRequest request) {
+		return (playerId == getCurrentPlayerId() && board.canMove(request));
 	}
 
 	public String render() {
 		return board.render();
 	}
 
+	public String getCurrentPlayerId() {
+		return board.getColorOnMove() == "WHITE" ? whiteId : blackId;
+	}
+
 	public MatchStateResponse getMatch() {
-		String currentId;
-		if (board.getColorOnMove() == "WHITE") {
-			currentId = whiteId;
-		} else {
-			currentId = blackId;
-		}
+		String currentId = getCurrentPlayerId();
 		return new MatchStateResponse(matchId, board._getUnicodePieces(), board.moves(), whiteId, blackId,
 				board._getStatus(),
 				currentId);

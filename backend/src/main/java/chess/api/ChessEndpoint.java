@@ -14,6 +14,7 @@ import akka.javasdk.annotations.http.Get;
 import akka.javasdk.annotations.http.HttpEndpoint;
 import akka.javasdk.annotations.http.Post;
 import akka.javasdk.client.ComponentClient;
+import akka.javasdk.http.AbstractHttpEndpoint;
 import akka.javasdk.timer.TimerScheduler;
 import akka.stream.Materializer;
 import chess.api.ChessApi.CreateMatchRequest;
@@ -26,10 +27,9 @@ import chess.application.MatchSummaryView;
 
 // @Acl(allow = @Acl.Matcher(service = "*"))
 @Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
-// @JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers =
-// "chess-web")
+@JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers = "chess-web")
 @HttpEndpoint("/chess")
-public class ChessEndpoint {
+public class ChessEndpoint extends AbstractHttpEndpoint {
 	private static final Logger log = LoggerFactory.getLogger(ChessEndpoint.class);
 
 	private final EndpointImpl core;
@@ -46,7 +46,10 @@ public class ChessEndpoint {
 
 	@Post("/matches/{matchId}/moves")
 	public CompletionStage<HttpResponse> addMove(String matchId, MoveRequest request) {
-		return core.addMove(matchId, request);
+		var claims = requestContext().getJwtClaims();
+		var userId = claims.subject().get();
+
+		return core.addMove(matchId, userId, request);
 	}
 
 	@Get("/matches/{matchId}/render")
@@ -71,7 +74,10 @@ public class ChessEndpoint {
 
 	@Post("/players/logins")
 	public CompletionStage<HttpResponse> recordLogin(LoginRecord login) {
-		return core.recordLogin(login);
+		var claims = requestContext().getJwtClaims();
+		var userId = claims.subject().get();
+
+		return core.recordLogin(userId, login);
 	}
 
 	@Get("/players/{playerId}")

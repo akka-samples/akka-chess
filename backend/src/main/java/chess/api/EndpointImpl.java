@@ -1,5 +1,6 @@
 package chess.api;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import org.slf4j.Logger;
@@ -8,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
 
 import akka.http.javadsl.model.HttpResponse;
+import akka.http.javadsl.model.StatusCode;
+import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.http.HttpException;
 import akka.javasdk.timer.TimerScheduler;
@@ -43,7 +46,12 @@ public class EndpointImpl {
 				.thenApply(cr -> cr.toHttpResponse());
 	}
 
-	public CompletionStage<HttpResponse> recordLogin(LoginRecord login) {
+	public CompletionStage<HttpResponse> recordLogin(String playerId, LoginRecord login) {
+
+		if (playerId != login.playerId()) {
+			return CompletableFuture
+					.completedFuture(HttpResponse.create().withStatus(StatusCodes.UNAUTHORIZED));
+		}
 		return componentClient.forEventSourcedEntity(login.playerId())
 				.method(PlayerEntity::recordLogin)
 				.invokeAsync(login)
@@ -51,10 +59,10 @@ public class EndpointImpl {
 
 	}
 
-	public CompletionStage<HttpResponse> addMove(String matchId, MoveRequest request) {
+	public CompletionStage<HttpResponse> addMove(String matchId, String playerId, MoveRequest request) {
 		return componentClient.forEventSourcedEntity(matchId)
 				.method(MatchEntity::move)
-				.invokeAsync(request)
+				.invokeAsync(new MatchEntity.MoveCommand(playerId, request))
 				.thenApply(cr -> cr.toHttpResponse());
 	}
 
