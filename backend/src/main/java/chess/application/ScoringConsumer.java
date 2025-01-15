@@ -20,15 +20,6 @@ public class ScoringConsumer extends Consumer {
 		this.componentClient = componentClient;
 	}
 
-	/*
-	 * public Effect onEvent(MatchEvent event) {
-	 * System.out.println("** YO **");
-	 * System.out.println(event);
-	 * logger.info("*** YO ***");
-	 * return effects().done();
-	 * }
-	 */
-
 	public Effect onGameFinished(MatchEvent.GameFinished finished) {
 
 		logger.info("Scoring consumer handling game finished event");

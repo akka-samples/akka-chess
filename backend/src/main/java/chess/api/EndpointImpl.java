@@ -9,21 +9,24 @@ import org.slf4j.LoggerFactory;
 import com.typesafe.config.Config;
 
 import akka.http.javadsl.model.HttpResponse;
-import akka.http.javadsl.model.StatusCode;
 import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.http.HttpException;
 import akka.javasdk.timer.TimerScheduler;
 import akka.stream.Materializer;
+import chess.api.ChessApi.CreateLobbyMatchRequest;
 import chess.api.ChessApi.CreateMatchRequest;
+import chess.api.ChessApi.JoinLobbyMatchRequest;
 import chess.api.ChessApi.LoginRecord;
 import chess.api.ChessApi.MatchStateResponse;
 import chess.api.ChessApi.MoveRequest;
 import chess.api.ChessApi.PlayerResponse;
+import chess.application.LobbyEntity;
 import chess.application.MatchArchiveView;
 import chess.application.MatchEntity;
 import chess.application.MatchSummaryView;
 import chess.application.PlayerEntity;
+import chess.domain.LobbyCommand;
 
 public class EndpointImpl {
 	private final Logger log = LoggerFactory.getLogger(EndpointImpl.class);
@@ -43,6 +46,21 @@ public class EndpointImpl {
 		return componentClient.forEventSourcedEntity(request.matchId())
 				.method(MatchEntity::create)
 				.invokeAsync(request)
+				.thenApply(cr -> cr.toHttpResponse());
+	}
+
+	public CompletionStage<HttpResponse> createLobbyMatch(CreateLobbyMatchRequest request) {
+		return componentClient.forEventSourcedEntity("main")
+				.method(LobbyEntity::createPendingMatch)
+				.invokeAsync(new LobbyCommand.CreatePendingMatch(request.matchId(),
+						request.whiteId(), LobbyEntity.generateShortcode(8)))
+				.thenApply(cr -> cr.toHttpResponse());
+	}
+
+	public CompletionStage<HttpResponse> joinLobbyMatch(JoinLobbyMatchRequest request) {
+		return componentClient.forEventSourcedEntity("main")
+				.method(LobbyEntity::joinPendingMatch)
+				.invokeAsync(new LobbyCommand.JoinPendingMatch(request.blackId(), request.joinCode()))
 				.thenApply(cr -> cr.toHttpResponse());
 	}
 
@@ -77,6 +95,16 @@ public class EndpointImpl {
 				.method(MatchSummaryView::getMatches)
 				.invokeAsync()
 				.exceptionally(ex -> {
+					throw HttpException.badRequest();
+				});
+	}
+
+	public CompletionStage<ChessApi.LobbyMatches> getLobbyMatches() {
+		return componentClient.forEventSourcedEntity("main")
+				.method(LobbyEntity::getPendingMatches)
+				.invokeAsync()
+				.exceptionally(ex -> {
+					log.error("failed to get pending matches", ex);
 					throw HttpException.badRequest();
 				});
 	}

@@ -32,6 +32,90 @@ defmodule AkkaChess.ChessClient do
     end
   end
 
+  def get_my_matches(playerId) do
+    req = gen_auth_request("/matches/player/#{playerId}", playerId)
+
+    case Req.run(req, decode_json: []) do
+      {req, %Req.Response{status: status} = response} when status != 200 ->
+        Logger.error("failed to query matches: #{inspect(response)}, #{inspect(req)}")
+        {:error, %{status: status}}
+
+      {_req, %Req.Response{} = resp} ->
+        {:ok, resp.body["matches"]}
+
+      {_req, exception} ->
+        {:error, exception}
+    end
+  end
+
+  def get_lobby_matches(playerId) do
+    req = gen_auth_request("/lobby/matches", playerId)
+
+    case Req.run(req, decode_json: []) do
+      {req, %Req.Response{status: status} = response} when status != 200 ->
+        Logger.error("failed to query lobby: #{inspect(response)}, #{inspect(req)}")
+        {:error, %{status: status}}
+
+      {_req, %Req.Response{} = resp} ->
+        {:ok, resp.body["matches"]}
+
+      {_req, exception} ->
+        {:error, exception}
+    end
+  end
+
+  def join_lobby_match(playerId, joinCode) do
+    req = gen_auth_request("/lobby/matches/join", playerId)
+
+    payload =
+      %{
+        joinCode: joinCode,
+        blackId: playerId
+      }
+      |> Jason.encode!()
+
+    req = Req.merge(req, body: payload, method: :post)
+
+    case Req.run(req, decode_json: []) do
+      {req, %Req.Response{status: status} = response} when status != 200 ->
+        Logger.error("failed to join lobby match: #{inspect(response)}, #{inspect(req)}")
+        {:error, %{status: status, message: response.body}}
+
+      {_req, %Req.Response{} = resp} ->
+        {:ok, resp.body}
+
+      {_req, exception} ->
+        {:error, exception}
+    end
+  end
+
+  def create_lobby_match(playerId) do
+    req = gen_auth_request("/lobby/matches", playerId)
+    newMatchId = UUID.uuid4(:hex)
+
+    payload =
+      %{
+        matchId: newMatchId,
+        whiteId: playerId
+      }
+      |> Jason.encode!()
+
+    req = Req.merge(req, body: payload, method: :post)
+
+    case Req.run(req, decode_json: []) do
+      {req, %Req.Response{status: status} = response} when status != 200 ->
+        Logger.error("Failed to create lobby match: #{inspect(response)}, #{inspect(req)}")
+
+        {:error, %{status: status, message: response.body}}
+
+      {_req, %Req.Response{} = resp} ->
+        {:ok, resp.body}
+
+      {_req, exception} ->
+        {:error, exception}
+    end
+  end
+
   def get_match(matchId, playerId) do
     req = gen_auth_request("/matches/#{matchId}", playerId)
 

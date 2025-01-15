@@ -22,6 +22,8 @@ defmodule AkkaChessWeb.Router do
     get "/", PageController, :home
 
     live "/play/:matchId", PlayLive
+    live "/me/matches", MatchesLive
+    live "/lobby", LobbyLive
   end
 
   scope "/auth", AkkaChessWeb do

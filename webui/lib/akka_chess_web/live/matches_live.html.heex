@@ -1,0 +1,27 @@
+<div class="border rounded-md">
+  <.table>
+    <.table_caption>My Matches</.table_caption>
+    <.table_header>
+      <.table_row>
+        <.table_head class="w-[40px] text-center align-middle">White</.table_head>
+        <.table_head class="w-[40px] text-center align-middle">Black</.table_head>
+        <.table_head>Started</.table_head>
+        <.table_head class="text-right">Action</.table_head>
+      </.table_row>
+    </.table_header>
+    <.table_body>
+      <.table_row :for={match <- @matches}>
+        <.table_cell>
+          {match["whiteId"]}
+        </.table_cell>
+        <.table_cell>
+          {match["blackId"]}
+        </.table_cell>
+        <.table_cell>
+          {match["started"]}
+        </.table_cell>
+        <.table_cell></.table_cell>
+      </.table_row>
+    </.table_body>
+  </.table>
+</div>

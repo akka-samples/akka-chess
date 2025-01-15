@@ -1,0 +1,37 @@
+<div class="grid grid-cols-1 gap-4">
+  <div>
+    <.button variant="outline" class="overflow-hidden rounded-full" phx-click="newmatch">
+      New Match
+    </.button>
+  </div>
+
+  <div class="border rounded-md">
+    <.table>
+      <.table_caption>Matches Awaiting an Opponent</.table_caption>
+      <.table_header>
+        <.table_row>
+          <.table_head class="w-[40px] text-center align-middle">Player</.table_head>
+          <.table_head>Started</.table_head>
+          <.table_head class="text-right">Action</.table_head>
+        </.table_row>
+      </.table_header>
+      <.table_body>
+        <.table_row :for={match <- @matches}>
+          <.table_cell>
+            {match["whiteId"]}
+          </.table_cell>
+          <.table_cell>
+            {match["started"]}
+          </.table_cell>
+          <.table_cell>
+            <%= if @current_user.id != match["whiteId"] do %>
+              <.button variant="outline" phx-click="join" phx-value-joincode={match["joinCode"]}>
+                Join
+              </.button>
+            <% end %>
+          </.table_cell>
+        </.table_row>
+      </.table_body>
+    </.table>
+  </div>
+</div>
