@@ -9,10 +9,10 @@ import com.typesafe.config.Config;
 
 import akka.http.javadsl.model.HttpResponse;
 import akka.javasdk.annotations.Acl;
+import akka.javasdk.annotations.JWT;
 import akka.javasdk.annotations.http.Get;
 import akka.javasdk.annotations.http.HttpEndpoint;
 import akka.javasdk.annotations.http.Post;
-import akka.javasdk.annotations.http.Put;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.http.AbstractHttpEndpoint;
 import akka.javasdk.timer.TimerScheduler;
@@ -29,8 +29,7 @@ import chess.application.MatchSummaryView;
 
 // @Acl(allow = @Acl.Matcher(service = "*"))
 @Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
-// @JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers =
-// "chess-web")
+@JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers = "chess-web")
 @HttpEndpoint("/chess")
 public class ChessEndpoint extends AbstractHttpEndpoint {
 	private static final Logger log = LoggerFactory.getLogger(ChessEndpoint.class);

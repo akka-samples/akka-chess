@@ -4,9 +4,13 @@ defmodule AkkaChessWeb.MatchesLive do
   require Logger
 
   import SaladUI.Table
+  import SaladUI.Button
 
   @impl true
   def mount(_params, session, socket) do
+    IO.inspect(socket)
+    IO.inspect(session)
+
     if Map.get(session, "current_user") == nil do
       {:ok,
        socket
@@ -16,6 +20,7 @@ defmodule AkkaChessWeb.MatchesLive do
       case AkkaChess.ChessClient.get_my_matches(session["current_user"].id) do
         {:ok, matches} ->
           IO.inspect(matches)
+          matches = fetch_players(matches)
           {:ok, assign(socket, matches: matches, current_user: session["current_user"])}
 
         {:error, e} ->
@@ -24,6 +29,42 @@ defmodule AkkaChessWeb.MatchesLive do
            |> put_flash(:error, "An error occurred trying to get your match list: #{inspect(e)}")
            |> push_navigate(to: "/")}
       end
+    end
+  end
+
+  defp fetch_players(matches) do
+    matches
+    |> Enum.map(fn match ->
+      black_player = fetch_player(match["blackId"])
+      white_player = fetch_player(match["whiteId"])
+
+      IO.inspect(white_player)
+      IO.inspect(black_player)
+
+      {:ok, started} = DateTime.from_unix(match["started"], :millisecond)
+      now = Timex.now()
+      time_diff = Timex.diff(now, started) |> Timex.Duration.from_microseconds()
+      # cut off millis and seconds
+      {h, m, s, mm} = time_diff |> Timex.Duration.to_clock()
+      time_diff = Timex.Duration.from_clock({h, m, 0, 0})
+      human_time = time_diff |> Timex.format_duration(:humanized)
+
+      match
+      |> Map.put("startedHuman", human_time)
+      |> Map.put("blackName", black_player.name)
+      |> Map.put("blackAvatar", black_player.avatar)
+      |> Map.put("whiteName", white_player.name)
+      |> Map.put("whiteAvatar", white_player.avatar)
+    end)
+  end
+
+  defp fetch_player(playerId) do
+    case AkkaChess.ChessClient.get_player(playerId) do
+      {:ok, player} ->
+        %{name: player["name"], avatar: player["avatarUrl"]}
+
+      _ ->
+        %{name: "??", avatar: ""}
     end
   end
 end

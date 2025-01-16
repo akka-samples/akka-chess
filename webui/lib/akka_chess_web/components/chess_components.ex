@@ -8,6 +8,7 @@ defmodule AkkaChessWeb.ChessComponents do
 
   attr :board, :list, required: true
   attr :player, :string, required: true
+  attr :selection, :string, required: true
 
   def chessboard(assigns) do
     ~H"""
@@ -26,10 +27,11 @@ defmodule AkkaChessWeb.ChessComponents do
         <div
           :for={{piece, idx} <- Enum.with_index(row)}
           phx-value-location={get_agn(ridx, idx)}
-          style={get_bg(ridx, idx)}
+          phx-value-piece={get_piece(piece)}
+          style={get_bg(@selection, ridx, idx)}
           phx-click={
             if can_move?(@board, @player) do
-              "move"
+              "select"
             else
               ""
             end
@@ -61,7 +63,7 @@ defmodule AkkaChessWeb.ChessComponents do
   end
 
   defp can_move?(board, playerId) do
-    board["currentPlayerId"] == playerId
+    "#{board["currentPlayerId"]}" == "#{playerId}"
   end
 
   defp get_border(row, col) do
@@ -72,6 +74,14 @@ defmodule AkkaChessWeb.ChessComponents do
     |> put_bottom_border()
     |> put_border_color()
   end
+
+  defp get_piece(piece) when piece == "♜" or piece == "♖", do: "R"
+  defp get_piece(piece) when piece == "♝" or piece == "♗", do: "B"
+  defp get_piece(piece) when piece == "♛" or piece == "♕", do: "Q"
+  defp get_piece(piece) when piece == "♚" or piece == "♔", do: "K"
+  defp get_piece(piece) when piece == "♞" or piece == "♘", do: "N"
+  defp get_piece(piece) when piece == "♟" or piece == "♙", do: "W"
+  defp get_piece(_piece), do: ""
 
   defp get_agn(row, col) when is_number(row) and is_number(col) do
     Enum.at(@cols, col) <> Enum.at(@rows, row)
@@ -108,11 +118,15 @@ defmodule AkkaChessWeb.ChessComponents do
     end
   end
 
-  defp get_bg(row, col) do
-    if is_bg?(row, col) do
-      "background-color: rgb(147 197 253);"
+  defp get_bg(selection, row, col) do
+    if selection == get_agn(row, col) do
+      "background-color: rgb(234 179 8);"
     else
-      "background-color: rgb(255 255 255);"
+      if is_bg?(row, col) do
+        "background-color: rgb(147 197 253);"
+      else
+        "background-color: rgb(255 255 255);"
+      end
     end
   end
 end

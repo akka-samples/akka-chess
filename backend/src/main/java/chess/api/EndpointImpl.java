@@ -66,7 +66,7 @@ public class EndpointImpl {
 
 	public CompletionStage<HttpResponse> recordLogin(String playerId, LoginRecord login) {
 
-		if (playerId != login.playerId()) {
+		if (!playerId.equals(login.playerId())) {
 			return CompletableFuture
 					.completedFuture(HttpResponse.create().withStatus(StatusCodes.UNAUTHORIZED));
 		}

@@ -17,7 +17,17 @@ defmodule AkkaChessWeb.PlayLive do
       {:ok, board} ->
         Phoenix.PubSub.subscribe(AkkaChess.PubSub, "match:#{matchId}")
 
-        {:ok, assign(socket, board: board, current_user: session["current_user"])}
+        white_player = fetch_player(board["whiteId"])
+        black_player = fetch_player(board["blackId"])
+
+        {:ok,
+         assign(socket,
+           board: board,
+           selection: "",
+           white_player: white_player,
+           black_player: black_player,
+           current_user: session["current_user"]
+         )}
 
       _ ->
         {:ok,
@@ -28,13 +38,42 @@ defmodule AkkaChessWeb.PlayLive do
   end
 
   @impl true
-  def handle_event("move", %{"location" => loc}, socket) do
-    IO.inspect(socket)
+  def handle_event("select", %{"location" => loc, "piece" => piece}, socket) do
+    selection_loc = Map.get(socket.assigns, :selection)
+    selection_piece = Map.get(socket.assigns, :selection_piece)
     IO.inspect(loc)
+    IO.inspect(selection_loc)
 
+    cond do
+      # Toggle off selection
+      selection_loc == loc ->
+        {:noreply, socket |> assign(:selection, "") |> assign(:selection_piece, "")}
+
+      # Clicked on a cell with a piece in it (select the piece)
+      selection_loc == "" and piece != "" ->
+        mpiece =
+          if piece == "W" do
+            ""
+          else
+            piece
+          end
+
+        {:noreply, socket |> assign(:selection, loc) |> assign(:selection_piece, mpiece)}
+
+      true ->
+        record_move(
+          socket,
+          socket.assigns.board["matchId"],
+          "#{socket.assigns.current_user.id}",
+          "#{selection_piece}#{loc}"
+        )
+    end
+  end
+
+  defp record_move(socket, matchId, userId, loc) do
     case ChessClient.record_move(
-           socket.assigns.board["matchId"],
-           socket.assigns.current_user.id,
+           matchId,
+           userId,
            loc
          ) do
       {:error, %{status: 400}} ->
@@ -45,7 +84,7 @@ defmodule AkkaChessWeb.PlayLive do
 
       {:ok, _body} ->
         # TODO: fetch new board
-        {:noreply, socket}
+        {:noreply, socket |> assign(:selection, "") |> assign(:selection_piece, "")}
     end
   end
 
@@ -66,5 +105,15 @@ defmodule AkkaChessWeb.PlayLive do
   def handle_info(msg, socket) do
     Logger.debug("Got unexpected message #{inspect(msg)}")
     {:noreply, socket}
+  end
+
+  defp fetch_player(playerId) do
+    case AkkaChess.ChessClient.get_player(playerId) do
+      {:ok, player} ->
+        %{name: player["name"], avatar: player["avatarUrl"], wins: player["wins"]}
+
+      _ ->
+        %{name: "??", avatar: "", wins: 0}
+    end
   end
 end

@@ -149,6 +149,7 @@ defmodule AkkaChess.ChessClient do
 
       {_req, exception} ->
         Logger.error("failed to get player from service: #{inspect(exception)}")
+        {:error, exception}
     end
   end
 

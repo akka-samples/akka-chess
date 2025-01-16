@@ -24,7 +24,7 @@
             {match["started"]}
           </.table_cell>
           <.table_cell>
-            <%= if @current_user.id != match["whiteId"] do %>
+            <%= if "#{@current_user.id}" != "#{match["whiteId"]}" do %>
               <.button variant="outline" phx-click="join" phx-value-joincode={match["joinCode"]}>
                 Join
               </.button>

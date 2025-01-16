@@ -3,24 +3,32 @@
     <.table_caption>My Matches</.table_caption>
     <.table_header>
       <.table_row>
-        <.table_head class="w-[40px] text-center align-middle">White</.table_head>
-        <.table_head class="w-[40px] text-center align-middle">Black</.table_head>
+        <.table_head class="text-center align-middle">Match</.table_head>
         <.table_head>Started</.table_head>
+        <.table_head>Moves</.table_head>
         <.table_head class="text-right">Action</.table_head>
       </.table_row>
     </.table_header>
     <.table_body>
       <.table_row :for={match <- @matches}>
         <.table_cell>
-          {match["whiteId"]}
+          {match["whiteName"]} vs {match["blackName"]}
         </.table_cell>
         <.table_cell>
-          {match["blackId"]}
+          {match["startedHuman"]} ago
+        </.table_cell>
+        <.table_cell class="align-middle text-center">
+          {length(match["moves"])}
         </.table_cell>
         <.table_cell>
-          {match["started"]}
+          <%= if match["finished"] == 0 do %>
+            <.button size="icon" class="overflow-hidden">
+              <.link href={"/play/" <> match["matchId"]}>
+                Play
+              </.link>
+            </.button>
+          <% end %>
         </.table_cell>
-        <.table_cell></.table_cell>
       </.table_row>
     </.table_body>
   </.table>

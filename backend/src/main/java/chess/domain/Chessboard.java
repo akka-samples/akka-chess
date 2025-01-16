@@ -38,10 +38,14 @@ public record Chessboard(ArrayList<String> moves) {
 		JChessGame game = playMoves();
 
 		List<Move> availableMoves = game.getAvailableMoves();
+		System.out.println(availableMoves);
 		try {
-			Move tgt = game.getMove(agn);
-			return availableMoves.contains(tgt);
+			// Move tgt = game.getMove(agn);
+			game.play(agn);
+			return true;
+			// return availableMoves.contains(tgt);
 		} catch (InvalidMoveException e) {
+			System.out.println(e);
 			return false;
 		}
 	}

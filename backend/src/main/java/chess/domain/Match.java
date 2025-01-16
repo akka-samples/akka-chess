@@ -16,7 +16,7 @@ public record Match(String matchId, Chessboard board, String whiteId, String bla
 	}
 
 	public boolean canMove(String playerId, MoveRequest request) {
-		return (playerId == getCurrentPlayerId() && board.canMove(request));
+		return (playerId.equals(getCurrentPlayerId()) && board.canMove(request));
 	}
 
 	public String render() {
@@ -24,7 +24,7 @@ public record Match(String matchId, Chessboard board, String whiteId, String bla
 	}
 
 	public String getCurrentPlayerId() {
-		return board.getColorOnMove() == "WHITE" ? whiteId : blackId;
+		return board.getColorOnMove().equalsIgnoreCase("WHITE") ? whiteId : blackId;
 	}
 
 	public MatchStateResponse getMatch() {
