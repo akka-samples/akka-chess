@@ -38,16 +38,19 @@ defmodule AkkaChessWeb.MatchesLive do
       black_player = fetch_player(match["blackId"])
       white_player = fetch_player(match["whiteId"])
 
-      IO.inspect(white_player)
-      IO.inspect(black_player)
-
       {:ok, started} = DateTime.from_unix(match["started"], :millisecond)
       now = Timex.now()
       time_diff = Timex.diff(now, started) |> Timex.Duration.from_microseconds()
       # cut off millis and seconds
-      {h, m, s, mm} = time_diff |> Timex.Duration.to_clock()
+      {h, m, _s, _mm} = time_diff |> Timex.Duration.to_clock()
       time_diff = Timex.Duration.from_clock({h, m, 0, 0})
-      human_time = time_diff |> Timex.format_duration(:humanized)
+
+      human_time =
+        if m == 0 do
+          "under a minute"
+        else
+          time_diff |> Timex.format_duration(:humanized)
+        end
 
       match
       |> Map.put("startedHuman", human_time)

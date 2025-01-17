@@ -18,10 +18,10 @@
       <.table_body>
         <.table_row :for={match <- @matches}>
           <.table_cell>
-            {match["whiteId"]}
+            {match["white_name"]}
           </.table_cell>
           <.table_cell>
-            {match["started"]}
+            {match["started_friendly"]} ago
           </.table_cell>
           <.table_cell>
             <%= if "#{@current_user.id}" != "#{match["whiteId"]}" do %>

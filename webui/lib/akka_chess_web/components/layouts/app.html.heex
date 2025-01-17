@@ -3,7 +3,7 @@
     <nav class="flex flex-col items-center gap-4 px-2 sm:py-5">
       <.tooltip>
         <.link
-          href="#"
+          href="/"
           class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
         >
           <.icon name="hero-home" class="h-5 w-5" />
@@ -12,6 +12,19 @@
         <.tooltip_content side="right">Home</.tooltip_content>
       </.tooltip>
     </nav>
+    <nav class="flex flex-col items-center gap-4 px-2 sm:py-5">
+      <.tooltip>
+        <.link
+          href="/lobby"
+          class="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+        >
+          <.icon name="hero-users" class="h-5 w-5" />
+          <span class="sr-only">Lobby</span>
+        </.link>
+        <.tooltip_content side="right">Lobby</.tooltip_content>
+      </.tooltip>
+    </nav>
+
     <nav class="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
       <.tooltip>
         <.link

@@ -16,17 +16,7 @@ defmodule AkkaChessWeb.LobbyLive do
        |> put_flash(:error, "Lobby is unavailable until you log in")
        |> push_navigate(to: "/")}
     else
-      case ChessClient.get_lobby_matches(session["current_user"].id) do
-        {:ok, matches} ->
-          IO.inspect(matches)
-          {:ok, assign(socket, matches: matches, current_user: session["current_user"])}
-
-        {:error, e} ->
-          {:ok,
-           socket
-           |> put_flash(:error, "An error occurred trying to get lobby match list: #{inspect(e)}")
-           |> push_navigate(to: "/")}
-      end
+      {:ok, socket |> assign_lobby_matches(session["current_user"])}
     end
   end
 
@@ -67,8 +57,57 @@ defmodule AkkaChessWeb.LobbyLive do
 
         {:ok, _body} ->
           # TODO: fetch new match list
-          {:noreply, socket}
+
+          {:noreply, socket |> assign_lobby_matches(socket.assigns.current_user)}
       end
+    end
+  end
+
+  defp assign_lobby_matches(socket, current_user) do
+    case ChessClient.get_lobby_matches(current_user.id) do
+      {:ok, matches} ->
+        matches =
+          Enum.map(matches, fn match ->
+            white_player = fetch_player(match["whiteId"])
+            human_time = timestamp_to_age(match["started"])
+
+            match
+            |> Map.put("white_name", white_player.name)
+            |> Map.put("started_friendly", human_time)
+          end)
+
+        assign(socket, matches: matches, current_user: current_user)
+
+      {:error, e} ->
+        socket
+        |> put_flash(:error, "An error occurred trying to get lobby match list: #{inspect(e)}")
+        |> push_navigate(to: "/")
+    end
+  end
+
+  defp fetch_player(playerId) do
+    case AkkaChess.ChessClient.get_player(playerId) do
+      {:ok, player} ->
+        %{name: player["name"], avatar: player["avatarUrl"]}
+
+      _ ->
+        %{name: "??", avatar: ""}
+    end
+  end
+
+  defp timestamp_to_age(isostarted) do
+    {:ok, started, _offset} = DateTime.from_iso8601(isostarted)
+    now = Timex.now()
+    time_diff = Timex.diff(now, started) |> Timex.Duration.from_microseconds()
+    # cut off millis and seconds
+    {h, m, _s, _mm} = time_diff |> Timex.Duration.to_clock()
+
+    if m == 0 do
+      "under a minute"
+    else
+      time_diff = Timex.Duration.from_clock({h, m, 0, 0})
+
+      time_diff |> Timex.format_duration(:humanized)
     end
   end
 end

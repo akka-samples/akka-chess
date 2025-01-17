@@ -13,28 +13,14 @@ defmodule AkkaChessWeb.PlayLive do
   def mount(params, session, socket) do
     matchId = Map.get(params, "matchId")
 
-    case AkkaChess.ChessClient.get_match(matchId, session["current_user"].id) do
-      {:ok, board} ->
-        Phoenix.PubSub.subscribe(AkkaChess.PubSub, "match:#{matchId}")
+    Phoenix.PubSub.subscribe(AkkaChess.PubSub, "match:#{matchId}")
 
-        white_player = fetch_player(board["whiteId"])
-        black_player = fetch_player(board["blackId"])
+    socket =
+      socket
+      |> assign_board(matchId, session["current_user"].id)
+      |> assign(current_user: session["current_user"])
 
-        {:ok,
-         assign(socket,
-           board: board,
-           selection: "",
-           white_player: white_player,
-           black_player: black_player,
-           current_user: session["current_user"]
-         )}
-
-      _ ->
-        {:ok,
-         socket
-         |> put_flash(:error, "That match (#{matchId}) does not exist")
-         |> push_navigate(to: "/")}
-    end
+    {:ok, socket}
   end
 
   @impl true
@@ -83,8 +69,11 @@ defmodule AkkaChessWeb.PlayLive do
         {:noreply, socket |> put_flash(:error, "Error processing move: code #{st}")}
 
       {:ok, _body} ->
-        # TODO: fetch new board
-        {:noreply, socket |> assign(:selection, "") |> assign(:selection_piece, "")}
+        {:noreply,
+         socket
+         |> assign(:selection, "")
+         |> assign(:selection_piece, "")
+         |> assign_board(matchId, userId)}
     end
   end
 
@@ -114,6 +103,26 @@ defmodule AkkaChessWeb.PlayLive do
 
       _ ->
         %{name: "??", avatar: "", wins: 0}
+    end
+  end
+
+  defp assign_board(socket, matchId, playerId) do
+    case AkkaChess.ChessClient.get_match(matchId, playerId) do
+      {:ok, board} ->
+        white_player = fetch_player(board["whiteId"])
+        black_player = fetch_player(board["blackId"])
+
+        assign(socket,
+          board: board,
+          selection: "",
+          white_player: white_player,
+          black_player: black_player
+        )
+
+      _ ->
+        socket
+        |> put_flash(:error, "That match (#{matchId}) does not exist")
+        |> push_navigate(to: "/")
     end
   end
 end
