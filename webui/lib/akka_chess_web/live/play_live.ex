@@ -112,6 +112,8 @@ defmodule AkkaChessWeb.PlayLive do
         white_player = fetch_player(board["whiteId"])
         black_player = fetch_player(board["blackId"])
 
+        board = Map.put(board, "moves", Enum.reverse(board["moves"]))
+
         assign(socket,
           board: board,
           selection: "",

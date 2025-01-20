@@ -32,6 +32,7 @@ public class LobbyEntity extends EventSourcedEntity<Lobby, LobbyEvent> {
 		return switch (event) {
 			case LobbyEvent.PlayerJoined joined -> currentState().onPlayerJoined(joined);
 			case LobbyEvent.PendingMatchCreated created -> currentState().onPendingMatchCreated(created);
+			case LobbyEvent.LobbyMatchExpired expired -> currentState().onExpired(expired);
 		};
 	}
 
@@ -60,7 +61,7 @@ public class LobbyEntity extends EventSourcedEntity<Lobby, LobbyEvent> {
 		return effects().reply(new ChessApi.LobbyMatches(output));
 	}
 
-	public Effect<CommandResponse> joinPendingMatch(LobbyCommand.JoinPendingMatch join) {
+	public Effect<PendingMatch> joinPendingMatch(LobbyCommand.JoinPendingMatch join) {
 		Optional<ChessApi.PendingMatch> pm = currentState().matchForJoinCode(join.joinCode());
 		if (!pm.isPresent()) {
 			return effects().error("no such match");
@@ -69,8 +70,17 @@ public class LobbyEntity extends EventSourcedEntity<Lobby, LobbyEvent> {
 		ChessApi.PendingMatch pending = pm.get();
 		LobbyEvent.PlayerJoined joined = new LobbyEvent.PlayerJoined(pending.matchId(),
 				pending.whiteId(), join.blackId());
-		return effects().persist(joined).thenReply(__ -> CommandResponse.accepted());
+		return effects().persist(joined).thenReply(__ -> pending);
 
+	}
+
+	public Effect<CommandResponse> expire(String whiteId) {
+		if (currentState().pendingMatches().containsKey(whiteId)) {
+			var expired = new LobbyEvent.LobbyMatchExpired(whiteId, Instant.now());
+			return effects().persist(expired).thenReply(__ -> CommandResponse.accepted());
+		} else {
+			return effects().reply(CommandResponse.accepted());
+		}
 	}
 
 	public static String generateShortcode(int length) {

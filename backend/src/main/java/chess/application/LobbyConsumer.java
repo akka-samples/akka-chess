@@ -37,6 +37,10 @@ public class LobbyConsumer extends Consumer {
 
 	}
 
+	public Effect onExpired(LobbyEvent.LobbyMatchExpired expired) {
+		return effects().ignore();
+	}
+
 	public Effect onPendingMatchCreated(LobbyEvent.PendingMatchCreated created) {
 		return effects().ignore();
 	}

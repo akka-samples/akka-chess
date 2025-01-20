@@ -13,4 +13,8 @@ public sealed interface LobbyEvent {
 	@TypeName("player-joined")
 	record PlayerJoined(String matchId, String whiteId, String blackId) implements LobbyEvent {
 	}
+
+	@TypeName("lobby-match-expired")
+	record LobbyMatchExpired(String whiteId, Instant expiredOn) implements LobbyEvent {
+	}
 }

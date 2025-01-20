@@ -18,6 +18,11 @@ public record Lobby(HashMap<String, PendingMatch> pendingMatches) {
 		return new Lobby(pendingMatches);
 	}
 
+	public Lobby onExpired(LobbyEvent.LobbyMatchExpired expired) {
+		pendingMatches.remove(expired.whiteId());
+		return new Lobby(pendingMatches);
+	}
+
 	public Optional<PendingMatch> matchForJoinCode(String joinCode) {
 		return pendingMatches.values().stream().filter(pm -> pm.joinCode().trim().equals(joinCode.trim()))
 				.findFirst();

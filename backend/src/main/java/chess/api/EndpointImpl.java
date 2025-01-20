@@ -1,5 +1,6 @@
 package chess.api;
 
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
@@ -8,10 +9,12 @@ import org.slf4j.LoggerFactory;
 
 import com.typesafe.config.Config;
 
+import akka.Done;
 import akka.http.javadsl.model.HttpResponse;
 import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.http.HttpException;
+import akka.javasdk.http.HttpResponses;
 import akka.javasdk.timer.TimerScheduler;
 import akka.stream.Materializer;
 import chess.api.ChessApi.CreateLobbyMatchRequest;
@@ -22,6 +25,7 @@ import chess.api.ChessApi.MatchStateResponse;
 import chess.api.ChessApi.MoveRequest;
 import chess.api.ChessApi.PlayerResponse;
 import chess.application.LobbyEntity;
+import chess.application.LobbyTimedAction;
 import chess.application.MatchArchiveView;
 import chess.application.MatchEntity;
 import chess.application.MatchSummaryView;
@@ -34,12 +38,20 @@ public class EndpointImpl {
 	protected final ComponentClient componentClient;
 	protected final TimerScheduler timerScheduler;
 	protected final Materializer materializer;
+	private final int lobbyMatchExpirationMinutes;
+
+	private String timerName(String whiteId) {
+		return "lobby-match-expiration-" + whiteId;
+	}
 
 	public EndpointImpl(Config config, ComponentClient componentClient, TimerScheduler timerScheduler,
 			Materializer materializer) {
 		this.componentClient = componentClient;
 		this.timerScheduler = timerScheduler;
 		this.materializer = materializer;
+
+		this.lobbyMatchExpirationMinutes = Integer.parseInt(
+				System.getenv().getOrDefault("LOBBY_EXPIRATION_MINUTES", "10"));
 	}
 
 	public CompletionStage<HttpResponse> createMatch(CreateMatchRequest request) {
@@ -50,18 +62,26 @@ public class EndpointImpl {
 	}
 
 	public CompletionStage<HttpResponse> createLobbyMatch(CreateLobbyMatchRequest request) {
-		return componentClient.forEventSourcedEntity("main")
+		CompletionStage<Done> timerRegistration = timerScheduler.startSingleTimer(
+				timerName(request.whiteId()),
+				Duration.ofMinutes(this.lobbyMatchExpirationMinutes),
+				componentClient.forTimedAction()
+						.method(LobbyTimedAction::expirePendingMatch)
+						.deferred(request.whiteId()));
+
+		return timerRegistration.thenCompose(done -> componentClient.forEventSourcedEntity("main")
 				.method(LobbyEntity::createPendingMatch)
 				.invokeAsync(new LobbyCommand.CreatePendingMatch(request.matchId(),
 						request.whiteId(), LobbyEntity.generateShortcode(8)))
-				.thenApply(cr -> cr.toHttpResponse());
+				.thenApply(cr -> cr.toHttpResponse()));
 	}
 
 	public CompletionStage<HttpResponse> joinLobbyMatch(JoinLobbyMatchRequest request) {
 		return componentClient.forEventSourcedEntity("main")
 				.method(LobbyEntity::joinPendingMatch)
 				.invokeAsync(new LobbyCommand.JoinPendingMatch(request.blackId(), request.joinCode()))
-				.thenApply(cr -> cr.toHttpResponse());
+				.thenCompose(pm -> timerScheduler.cancel(pm.whiteId()))
+				.thenApply(__ -> HttpResponses.ok());
 	}
 
 	public CompletionStage<HttpResponse> recordLogin(String playerId, LoginRecord login) {
