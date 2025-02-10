@@ -80,7 +80,7 @@ public class ChessEndpoint extends AbstractHttpEndpoint {
 	}
 
 	@Post("/lobby/matches/join")
-	public CompletionStage<HttpResponse> joinLobbyMatch(JoinLobbyMatchRequest request) {
+	public CompletionStage<ChessApi.PendingMatch> joinLobbyMatch(JoinLobbyMatchRequest request) {
 		return core.joinLobbyMatch(request);
 	}
 

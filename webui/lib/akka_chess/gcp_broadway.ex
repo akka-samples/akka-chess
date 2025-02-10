@@ -38,11 +38,13 @@ defmodule AkkaChess.GcpBroadway do
       #      IO.inspect(msg)
       decoded = Jason.decode!(msg.data)
       eventType = Map.get(msg.metadata.attributes, "ce-type")
-      matchId = Map.get(decoded, "matchId")
 
-      Logger.debug("Dispatching #{eventType} for match #{matchId}")
+      if eventType in ["piece-moved", "game-finished", "match-started"] do
+        matchId = Map.get(decoded, "matchId")
+        Logger.debug("Dispatching #{eventType} for match #{matchId}")
 
-      Phoenix.PubSub.broadcast(AkkaChess.PubSub, "match:#{matchId}", {eventType, decoded})
+        Phoenix.PubSub.broadcast(AkkaChess.PubSub, "match:#{matchId}", {eventType, decoded})
+      end
     end
 
     messages

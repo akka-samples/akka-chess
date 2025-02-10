@@ -31,8 +31,8 @@ defmodule AkkaChessWeb.LobbyLive do
       {:error, %{status: st}} ->
         {:noreply, socket |> put_flash(:error, "Error joining lobby match: code #{st}")}
 
-      {:ok, _body} ->
-        {:noreply, socket}
+      {:ok, pm} ->
+        {:noreply, socket |> push_navigate(to: "/play/#{pm["matchId"]}")}
     end
   end
 

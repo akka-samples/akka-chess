@@ -23,6 +23,7 @@ import chess.api.ChessApi.JoinLobbyMatchRequest;
 import chess.api.ChessApi.LoginRecord;
 import chess.api.ChessApi.MatchStateResponse;
 import chess.api.ChessApi.MoveRequest;
+import chess.api.ChessApi.PendingMatch;
 import chess.api.ChessApi.PlayerResponse;
 import chess.application.LobbyEntity;
 import chess.application.LobbyTimedAction;
@@ -76,12 +77,17 @@ public class EndpointImpl {
 				.thenApply(cr -> cr.toHttpResponse()));
 	}
 
-	public CompletionStage<HttpResponse> joinLobbyMatch(JoinLobbyMatchRequest request) {
+	public CompletionStage<PendingMatch> joinLobbyMatch(JoinLobbyMatchRequest request) {
 		return componentClient.forEventSourcedEntity("main")
 				.method(LobbyEntity::joinPendingMatch)
 				.invokeAsync(new LobbyCommand.JoinPendingMatch(request.blackId(), request.joinCode()))
-				.thenCompose(pm -> timerScheduler.cancel(pm.whiteId()))
-				.thenApply(__ -> HttpResponses.ok());
+				.thenCompose(pm -> {
+					timerScheduler.cancel(pm.whiteId());
+					return CompletableFuture.completedStage(pm);
+				})
+				.exceptionally(ex -> {
+					throw HttpException.badRequest();
+				});
 	}
 
 	public CompletionStage<HttpResponse> recordLogin(String playerId, LoginRecord login) {

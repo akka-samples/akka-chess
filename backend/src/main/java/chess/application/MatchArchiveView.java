@@ -20,7 +20,12 @@ public class MatchArchiveView extends View {
 			long started, long finished) {
 
 		public MatchArchive addMove(String agn) {
-			ArrayList<String> newMoves = new ArrayList<String>(moves);
+			ArrayList<String> newMoves;
+			if (moves != null) {
+				newMoves = new ArrayList<String>(moves);
+			} else {
+				newMoves = new ArrayList<String>();
+			}
 			newMoves.add(agn);
 			return new MatchArchive(matchId, newMoves, whiteId, blackId, started, finished);
 		}

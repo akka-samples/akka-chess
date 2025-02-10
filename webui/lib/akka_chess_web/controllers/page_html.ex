@@ -6,5 +6,8 @@ defmodule AkkaChessWeb.PageHTML do
   """
   use AkkaChessWeb, :html
 
+  import SaladUI.Button
+  import SaladUI.Card
+
   embed_templates "page_html/*"
 end

@@ -1,1 +1,34 @@
-Howdy
+<.card class="w-[550px]">
+  <.card_header>
+    <.card_title>Akka Chess</.card_title>
+    <.card_description>Akka 3 Sample Application</.card_description>
+  </.card_header>
+  <.card_content>
+    <form>
+      <div class="grid w-full items-center gap-4">
+        <div class="flex flex-col space-y-1.5">
+          Akka Chess is a sample application that illustrates a number of
+          Akka's most powerful features.
+          It is an event sourced application that treats the list of moves within each match as an
+          immutable event log streamed to the match entity.
+
+          Use the documentation link below to learn more about how it was built or click the Play button to enter the matchmaking lobby.
+        </div>
+      </div>
+    </form>
+  </.card_content>
+  <.card_footer class="flex justify-between">
+    <a
+      href="https://doc.akka.io"
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    >
+      Documentation
+    </a>
+    <a
+      href="/lobby"
+      class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+    >
+      Play Live
+    </a>
+  </.card_footer>
+</.card>
