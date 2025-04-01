@@ -1,4 +1,5 @@
 # Akka Chess
+
 Akka Chess is a sample application that illustrates building a complete, resilient, automatically scalable, event-sourced application using the Akka SDK.
 
 ## Feature Progress
