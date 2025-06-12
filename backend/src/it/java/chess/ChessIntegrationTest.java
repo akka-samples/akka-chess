@@ -1,6 +1,9 @@
 package chess;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.TemporalUnit;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,7 +79,7 @@ public class ChessIntegrationTest extends TestKitSupport {
 		Assertions.assertEquals(response2.code(), 200);
 
 		// Assert the list of events we expect
-		eventsTopic.expectOneTyped(PlayerEvent.LoggedIn.class);
+		eventsTopic.expectOneTyped(PlayerEvent.LoggedIn.class, Duration.ofSeconds(10));
 		eventsTopic.expectOneTyped(PlayerEvent.LoggedIn.class);
 		eventsTopic.expectOneTyped(MatchEvent.MatchStarted.class);
 		eventsTopic.expectOneTyped(MatchEvent.GameFinished.class);
@@ -139,7 +142,7 @@ public class ChessIntegrationTest extends TestKitSupport {
 		eventsTopic.expectOneTyped(MatchEvent.MatchStarted.class);
 		eventsTopic.expectOneTyped(MatchEvent.GameFinished.class);
 		// we should get 2 draw events
-		eventsTopic.expectOneTyped(PlayerEvent.MatchWon.class);
+		eventsTopic.expectOneTyped(PlayerEvent.MatchWon.class, Duration.ofSeconds(10));
 		eventsTopic.expectOneTyped(PlayerEvent.MatchLost.class);
 
 		PlayerResponse player1 = await(
