@@ -10,7 +10,7 @@ permissions:
 jobs:
   verify:
     name: Verfiy
-    runs-on: ubuntu-22.04
+    runs-on: Akka-Default
     if: github.event.repository.fork == false
     steps:
       - name: Checkout
@@ -42,6 +42,9 @@ jobs:
         uses: coursier/setup-action@7bde40eee928896f074dbb76d22dd772eed5c65f
         with:
           jvm: temurin:1.21
+
+      - name: Setup global resolver
+        run: ./.github/setup_global_resolver.sh
 
       - name: mvn verify
         run: |-
