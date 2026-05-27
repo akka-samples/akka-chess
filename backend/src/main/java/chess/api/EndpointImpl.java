@@ -63,7 +63,7 @@ public class EndpointImpl {
 	}
 
 	public CompletionStage<HttpResponse> createLobbyMatch(CreateLobbyMatchRequest request) {
-		CompletionStage<Done> timerRegistration = timerScheduler.startSingleTimer(
+		CompletionStage<Done> timerRegistration = timerScheduler.createSingleTimerAsync(
 				timerName(request.whiteId()),
 				Duration.ofMinutes(this.lobbyMatchExpirationMinutes),
 				componentClient.forTimedAction()
@@ -82,7 +82,7 @@ public class EndpointImpl {
 				.method(LobbyEntity::joinPendingMatch)
 				.invokeAsync(new LobbyCommand.JoinPendingMatch(request.blackId(), request.joinCode()))
 				.thenCompose(pm -> {
-					timerScheduler.cancel(pm.whiteId());
+					timerScheduler.delete(pm.whiteId());
 					return CompletableFuture.completedStage(pm);
 				})
 				.exceptionally(ex -> {

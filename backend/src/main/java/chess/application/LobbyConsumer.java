@@ -3,7 +3,7 @@ package chess.application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.annotations.Consume;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.consumer.Consumer;
@@ -12,7 +12,7 @@ import chess.domain.LobbyEvent;
 
 // When the black player joins a pending match in the lobby, create the 
 // corresponding real match with both players
-@ComponentId("lobby-consumer")
+@Component(id = "lobby-consumer")
 @Consume.FromEventSourcedEntity(LobbyEntity.class)
 public class LobbyConsumer extends Consumer {
 

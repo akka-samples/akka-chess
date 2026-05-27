@@ -5,7 +5,7 @@ import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.eventsourcedentity.EventSourcedEntity;
 import akka.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import chess.api.ChessApi.LoginRecord;
@@ -13,7 +13,7 @@ import chess.api.ChessApi.PlayerResponse;
 import chess.domain.Player;
 import chess.domain.PlayerEvent;
 
-@ComponentId("player")
+@Component(id = "player")
 public class PlayerEntity extends EventSourcedEntity<Player, PlayerEvent> {
 	private final String entityId;
 

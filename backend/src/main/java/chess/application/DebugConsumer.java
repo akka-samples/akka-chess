@@ -1,12 +1,12 @@
 package chess.application;
 
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.annotations.Consume;
 import akka.javasdk.consumer.Consumer;
 import chess.domain.MatchEvent;
 import chess.domain.PlayerEvent;
 
-@ComponentId("debug-consumer")
+@Component(id = "debug-consumer")
 @Consume.FromTopic("chess-events")
 public class DebugConsumer extends Consumer {
 

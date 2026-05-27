@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.eventsourcedentity.EventSourcedEntity;
 import akka.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import chess.api.ChessApi;
@@ -16,7 +16,7 @@ import chess.domain.Lobby;
 import chess.domain.LobbyCommand;
 import chess.domain.LobbyEvent;
 
-@ComponentId("lobby")
+@Component(id = "lobby")
 public class LobbyEntity extends EventSourcedEntity<Lobby, LobbyEvent> {
 
 	public LobbyEntity(EventSourcedEntityContext context) {

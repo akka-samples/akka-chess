@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.eventsourcedentity.EventSourcedEntity;
 import akka.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import chess.api.ChessApi.CreateMatchRequest;
@@ -16,7 +16,7 @@ import chess.domain.Chessboard;
 import chess.domain.Match;
 import chess.domain.MatchEvent;
 
-@ComponentId("chess-match")
+@Component(id = "chess-match")
 public class MatchEntity extends EventSourcedEntity<Match, MatchEvent> {
 	private final String entityId;
 

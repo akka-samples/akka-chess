@@ -4,14 +4,14 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.annotations.Consume;
 import akka.javasdk.annotations.Query;
 import akka.javasdk.view.TableUpdater;
 import akka.javasdk.view.View;
 import chess.domain.MatchEvent;
 
-@ComponentId("view_match_archive")
+@Component(id = "view_match_archive")
 public class MatchArchiveView extends View {
 	public record MatchArchives(List<MatchArchive> matches) {
 	}
