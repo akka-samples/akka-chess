@@ -3,13 +3,13 @@ package chess.application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.annotations.Consume;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.consumer.Consumer;
 import chess.domain.MatchEvent;
 
-@ComponentId("score-consumer")
+@Component(id = "score-consumer")
 @Consume.FromEventSourcedEntity(MatchEntity.class)
 public class ScoringConsumer extends Consumer {
 

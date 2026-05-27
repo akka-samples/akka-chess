@@ -2,14 +2,14 @@ package chess.application;
 
 import java.util.List;
 
-import akka.javasdk.annotations.ComponentId;
+import akka.javasdk.annotations.Component;
 import akka.javasdk.annotations.Consume;
 import akka.javasdk.annotations.Query;
 import akka.javasdk.view.TableUpdater;
 import akka.javasdk.view.View;
 import chess.domain.MatchEvent;
 
-@ComponentId("view_match_summary")
+@Component(id = "view_match_summary")
 public class MatchSummaryView extends View {
 
 	public record Matches(List<MatchSummary> matches) {
